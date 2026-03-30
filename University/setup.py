@@ -66,6 +66,6 @@ def create_tables(connection):
 if __name__ == "__main__":
     db_connection = connect_to_db()
     if db_connection:
-        create_database(db_connection)
+        # create_database(db_connection)
         create_tables(db_connection)
         db_connection.close()
