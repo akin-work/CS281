@@ -25,21 +25,17 @@ def connect_to_db():
         return None 
     
 def create_database(connection):
-    # Ensure that the connection is not None before attempting to create the database.
     assert connection is not None, "Connection to database failed. Cannot create database." 
     
-    # Attempt to create the 'university' database if it does not already exist.
-    try: 
-        # Create a cursor object to execute SQL commands.
+    try:
+        connection.autocommit = True
+
         cur = connection.cursor() 
         
-        # Check if the 'university' database already exists.
         cur.execute("SELECT 1 FROM pg_database WHERE datname='university';") 
         
-        # If the 'university' database doe not exist, create it.
         if not cur.fetchone():
             cur.execute("CREATE DATABASE university;") 
-            connection.commit() 
             print("Database 'university' created successfully")
         else:
             print("Database 'university' already exists")
@@ -66,6 +62,6 @@ def create_tables(connection):
 if __name__ == "__main__":
     db_connection = connect_to_db()
     if db_connection:
-        # create_database(db_connection)
+        create_database(db_connection)
         create_tables(db_connection)
         db_connection.close()
