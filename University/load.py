@@ -45,12 +45,24 @@ def show_tables(connection, relations):
         print(f"An error occurred while showing the tables: {e}")
     finally:
         cur.close()
+        
+def get_relation_names(ddl_file="ddl.sql"):
+    relations = []
+    with open(ddl_file, "r") as f:
+        for line in f:
+            line = line.strip()
+            if line.upper().startswith("CREATE TABLE IF NOT EXISTS"):
+                parts = line.split()
+                if len(parts) > 5:
+                    relation_name = parts[5].rstrip("(")
+                    relations.append(relation_name)
+    return relations
     
         
 if __name__ == "__main__":
     db_connection = connect_to_db()
     if db_connection:
-        relations = ["classroom", "department", "course", "instructor", "section", "teaches", "student", "takes", "advisor", "time_slot", "prereq"]
+        relations = get_relation_names()
         load_data(db_connection, relations)
         show_tables(db_connection, relations)
         db_connection.close()

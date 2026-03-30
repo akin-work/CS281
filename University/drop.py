@@ -2,11 +2,12 @@ import psycopg2
 import os
 from dotenv import load_dotenv
 from setup import connect_to_db
+from load import get_relation_names
 
 def drop_tables(connection):
     try:
         cur = connection.cursor()
-        tables = ["classroom", "department", "course", "instructor", "section", "teaches", "student", "takes", "advisor", "time_slot", "prereq"]
+        tables = get_relation_names(connection)
         
         for table in tables:
             cur.execute(f"DROP TABLE IF EXISTS {table} CASCADE;")
