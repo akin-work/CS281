@@ -7,9 +7,9 @@ from load import get_relation_names
 def drop_tables(connection):
     try:
         with connection.cursor() as cur:
-            tables = get_relation_names()
+            tables = get_relation_names(connection)
         
-            for table in tables:
+            for table in reversed(tables):
                 cur.execute(f"DROP TABLE IF EXISTS {table} CASCADE;")
         connection.commit()
         print("Tables dropped successfully")

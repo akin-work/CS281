@@ -35,7 +35,15 @@ def show_tables(connection, relations):
     except Exception as e:
         print(f"An error occurred while showing the tables: {e}")
         
-def get_relation_names(ddl_file="ddl.sql"):
+def get_relation_names(connection, ddl_file="ddl.sql"):
+    with connection.cursor() as cur:
+        cur.execute("""
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            AND table_type = 'BASE TABLE';
+        """)
+        table_names = set([row[0] for row in cur.fetchall()])
     relations = []
     with open(ddl_file, "r") as f:
         for line in f:
@@ -45,13 +53,13 @@ def get_relation_names(ddl_file="ddl.sql"):
                 if len(parts) > 5:
                     relation_name = parts[5].rstrip("(")
                     relations.append(relation_name)
-    return relations
+    return [rel for rel in relations if rel in table_names]
     
         
 if __name__ == "__main__":
     db_connection = connect_to_db()
     if db_connection:
-        relations = get_relation_names()
+        relations = get_relation_names(db_connection)
         load_data(db_connection, relations)
         show_tables(db_connection, relations)
         db_connection.close()
