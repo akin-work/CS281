@@ -6,17 +6,29 @@ from dotenv import load_dotenv
 from setup import connect_to_db
 from load import show_tables
 
+from tabulate import tabulate
+
 def execute_query(connection, query):
     try:
         cur = connection.cursor()
         cur.execute(query)
-        results = cur.fetchall()
-        column_names = [desc[0] for desc in cur.description]
-        print(tabulate(results, headers=column_names, tablefmt="psql"))
-        return results
+
+        # Check if the query returned rows (SELECT)
+        if cur.description:
+            results = cur.fetchall()
+            column_names = [desc[0] for desc in cur.description]
+            print(tabulate(results, headers=column_names, tablefmt="psql"))
+            return results
+        else:
+            # For INSERT/UPDATE/DELETE/DROP/CREATE, etc.
+            connection.commit()  # commit changes
+            print(f"Query executed successfully: {cur.rowcount} rows affected")
+            return cur.rowcount
+
     except Exception as e:
         print(f"An error occurred while executing the query: {e}")
         return None
+
     finally:
         cur.close()
         
