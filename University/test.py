@@ -23,7 +23,9 @@ def test_connection():
 if __name__ == "__main__":
     db_connection = test_connection()
     if db_connection:
-        cur = db_connection.cursor()
-        cur.execute("SELECT version();")
-        db_version = cur.fetchone()
-        print(f"Database version: {db_version[0]}")
+        with db_connection.cursor() as cur:
+            cur.execute("SELECT version();")
+            db_version = cur.fetchone()
+            print(f"Database version: {db_version[0]}")
+        db_connection.close()
+        

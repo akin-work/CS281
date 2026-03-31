@@ -24,39 +24,30 @@ def connect_to_db():
         print(f"An error occurred while connecting to the database: {e}")
         return None 
     
-def create_database(connection):
-    assert connection is not None, "Connection to database failed. Cannot create database." 
-    
+def create_database(connection, db_name="university"):
     try:
         connection.autocommit = True
 
-        cur = connection.cursor() 
-        
-        cur.execute("SELECT 1 FROM pg_database WHERE datname='university';") 
-        
-        if not cur.fetchone():
-            cur.execute("CREATE DATABASE university;") 
-            print("Database 'university' created successfully")
-        else:
-            print("Database 'university' already exists")
-        
+        with connection.cursor() as cur:
+            cur.execute(f"SELECT 1 FROM pg_database WHERE datname='{db_name}';") 
+            if not cur.fetchone():
+                cur.execute(f"CREATE DATABASE {db_name};") 
+                print(f"Database '{db_name}' created successfully")
+            else:
+                print(f"Database '{db_name}' already exists")
     except Exception as e:
         print(f"An error occurred while creating the database: {e}")
-    finally:
-        cur.close()
         
 def create_tables(connection):
     try:        
-        cur = connection.cursor()
-        with open("ddl.sql", "r") as f:
-            ddl = f.read()
-        cur.execute(ddl)
-        connection.commit()
-        print("Table created successfully")
+        with connection.cursor() as cur:
+            with open("ddl.sql", "r") as f:
+                ddl = f.read()
+            cur.execute(ddl)
+            connection.commit()
+            print("Table created successfully")
     except Exception as e:
         print(f"An error occurred while creating the table: {e}")
-    finally:
-        cur.close()
         
 
 if __name__ == "__main__":

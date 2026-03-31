@@ -5,46 +5,35 @@ from tabulate import tabulate
 from dotenv import load_dotenv
 from setup import connect_to_db
 
-def load_data(connection, relations):
+def load_data(connection, relations, data_dir="DATA"):
     try:
-        cur = connection.cursor()
-        for relation in relations:
-            with open(f"DATA/{relation}.csv", "r") as f:
-                reader = csv.reader(f)
-                headers = next(reader)  # column names
-
-                placeholders = ", ".join(["%s"] * len(headers)) #
-                columns = ", ".join(headers)
-
-                query = f"""
-                INSERT INTO {relation} ({columns})
-                VALUES ({placeholders})
-                ON CONFLICT DO NOTHING;
-                """
-
-                for row in reader:
-                    cur.execute(query, row)
+        with connection.cursor() as cur:
+            for relation in relations:
+                csv_file = f"{data_dir}/{relation}.csv"
+                with open(csv_file, "r") as f:
+                    reader = csv.reader(f)
+                    headers = next(reader)  # skip header row
+                    for row in reader:
+                        placeholders = ", ".join(["%s"] * len(row))
+                        insert_query = f"INSERT INTO {relation} ({', '.join(headers)}) VALUES ({placeholders});"
+                        cur.execute(insert_query, row)
         connection.commit()
         print("Data loaded successfully")
     except Exception as e:
         print(f"An error occurred while loading the data: {e}")
-    finally:
-        cur.close()
                 
 def show_tables(connection, relations):
     try:
-        cur = connection.cursor()
-        for relation in relations:
-            cur.execute(f"SELECT * FROM {relation};")
-            results = cur.fetchall()
-            column_names = [desc[0] for desc in cur.description]
-            print(f"Table: {relation}")
-            print(tabulate(results, headers=column_names, tablefmt="psql"))
-            print("\n")
+        with connection.cursor() as cur:
+            for relation in relations:
+                cur.execute(f"SELECT * FROM {relation};")
+                results = cur.fetchall()
+                column_names = [desc[0] for desc in cur.description]
+                print(f"Table: {relation}")
+                print(tabulate(results, headers=column_names, tablefmt="psql"))
+                print("\n")
     except Exception as e:
         print(f"An error occurred while showing the tables: {e}")
-    finally:
-        cur.close()
         
 def get_relation_names(ddl_file="ddl.sql"):
     relations = []
