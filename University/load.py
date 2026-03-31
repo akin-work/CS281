@@ -10,16 +10,21 @@ def load_data(connection, relations, data_dir="DATA"):
         with connection.cursor() as cur:
             for relation in relations:
                 csv_file = f"{data_dir}/{relation}.csv"
+                
+                if not os.path.isfile(csv_file):
+                    print(f"CSV file for relation '{relation}' not found at '{csv_file}'. Skipping.")
+                    continue
+                
                 with open(csv_file, "r") as f:
-                    reader = csv.reader(f)
-                    headers = next(reader)  # skip header row
-                    for row in reader:
-                        placeholders = ", ".join(["%s"] * len(row))
-                        insert_query = f"INSERT INTO {relation} ({', '.join(headers)}) VALUES ({placeholders});"
-                        cur.execute(insert_query, row)
+                    try:
+                        cur.copy_expert(f"COPY {relation} FROM STDIN WITH CSV HEADER", f)
+                    except Exception as e:
+                        print(f"Error loading data for relation '{relation}': {e}")
+                        continue
         connection.commit()
         print("Data loaded successfully")
     except Exception as e:
+        connection.rollback()
         print(f"An error occurred while loading the data: {e}")
                 
 def show_tables(connection, relations):
