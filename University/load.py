@@ -9,6 +9,11 @@ def load_data(connection, relations, data_dir="DATA"):
     try:
         with connection.cursor() as cur:
             for relation in relations:
+                cur.execute(f"SELECT COUNT(*) FROM {relation};")
+                count = cur.fetchone()[0]
+                if count > 0:
+                    continue
+                
                 csv_file = f"{data_dir}/{relation}.csv"
                 
                 if not os.path.isfile(csv_file):
