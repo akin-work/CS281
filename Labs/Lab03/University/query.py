@@ -25,6 +25,7 @@ def execute_query(connection, query):
                 print(f"Query executed successfully: {cur.rowcount} rows affected")
                 return cur.rowcount
     except Exception as e:
+        connection.rollback()
         print(f"An error occurred while executing the query: {e}")
         return None
         

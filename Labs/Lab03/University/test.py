@@ -1,31 +1,17 @@
 import psycopg2
 import os
 from dotenv import load_dotenv 
+from setup import connect_to_db
 
-def test_connection():
-    load_dotenv()
+def version(connection):
     try:
-        connection = psycopg2.connect(
-            host=os.getenv("DB_HOST"),
-            database=os.getenv("DB_NAME"),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            sslmode=os.getenv("DB_SSLMODE"),
-            channel_binding=os.getenv("DB_CHANNEL_BINDING")
-        )
-        print("Connection to database successful")
-        return connection
-    
+        with connection.cursor() as cur:
+            cur.execute("SELECT version();")
+            db_version = cur.fetchone()[0]
+            print(f"Database version: {db_version[0]}")
     except Exception as e:
-        print(f"An error occurred while connecting to the database: {e}")
-        return None
+        print(f"An error occurred while fetching the database version: {e}")
     
 if __name__ == "__main__":
-    db_connection = test_connection()
-    if db_connection:
-        with db_connection.cursor() as cur:
-            cur.execute("SELECT version();")
-            db_version = cur.fetchone()
-            print(f"Database version: {db_version[0]}")
-        db_connection.close()
+    db_connection = connect_to_db()
         
