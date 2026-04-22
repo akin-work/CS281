@@ -32,20 +32,29 @@ if __name__ == "__main__":
     # create_tables(db)
     query = """CREATE ROLE cs_instructor LOGIN PASSWORD 'instructor123';
                 CREATE VIEW cs_students AS SELECT * FROM student WHERE dept_name = 'Comp. Sci.';
-                GRANT SELECT ON cs_students TO cs_instructor;"""
+                GRANT SELECT ON cs_students TO cs_instructor;
+                GRANT SELECT ON student TO cs_instructor;
+                """
         
     execute_query(db, query)
     db.close()
     
     db = connect_as_user("cs_instructor", "instructor123")
     if db:
-        query = "SELECT * FROM cs_students;"
-        execute_query(db, query)
+        
+        queries = [
+            "SELECT * FROM student;",
+            "SELECT * FROM cs_students;"
+        ]
+        for query in queries:
+            execute_query(db, query)
+
         db.close()
         
     db = connect_to_db()
     query = """
         DROP VIEW IF EXISTS cs_students;
+        REVOKE SELECT ON student FROM cs_instructor;
         DROP ROLE IF EXISTS cs_instructor;
     """
     execute_query(db, query)
