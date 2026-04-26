@@ -32,10 +32,10 @@ def load_data(connection, relations, data_dir="DATA"):
         connection.rollback()
         print(f"An error occurred while loading the data: {e}")
                 
-def show_tables(connection, relations):
+def show_tables(connection):
     try:
         with connection.cursor() as cur:
-            for relation in relations:
+            for relation in get_relation_names(connection):
                 cur.execute(f"SELECT * FROM {relation};")
                 results = cur.fetchall()
                 column_names = [desc[0] for desc in cur.description]

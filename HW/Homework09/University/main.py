@@ -1,11 +1,7 @@
 import psycopg2
 import os
-import csv
 from tabulate import tabulate
 from dotenv import load_dotenv
-from query import execute_query
-from setup import connect_to_db, create_database, create_tables
-
     
 def connect_as_user(username, password):
     load_dotenv()
@@ -26,15 +22,39 @@ def connect_as_user(username, password):
         print(f"An error occurred while connecting to the database as {username}: {e}")
         return None
 
+def execute_query(connection, query):
+    try:
+        with connection.cursor() as cur:
+            cur.execute(query)
+
+            # Check if the query returned rows (SELECT)
+            if cur.description:
+                results = cur.fetchall()
+                column_names = [desc[0] for desc in cur.description]
+                print(tabulate(results, headers=column_names, tablefmt="psql"))
+                return results
+            else:
+                # For INSERT/UPDATE/DELETE/DROP/CREATE, etc.
+                connection.commit()  # commit changes
+                print(f"Query executed successfully: {cur.rowcount} rows affected")
+                return cur.rowcount
+    except Exception as e:
+        connection.rollback()
+        print(f"An error occurred while executing the query: {e}")
+        return None
+
 if __name__ == "__main__":
-    db = connect_to_db()
-    # create_database(db)
-    # create_tables(db)
-    query = """CREATE ROLE cs_instructor LOGIN PASSWORD 'instructor123';
-                CREATE VIEW cs_students AS SELECT * FROM student WHERE dept_name = 'Comp. Sci.';
-                GRANT SELECT ON cs_students TO cs_instructor;
-                GRANT SELECT ON student TO cs_instructor;
-                """
+    load_dotenv()
+    username = os.getenv("DB_USER")
+    password = os.getenv("DB_PASSWORD")
+    db = connect_as_user(username, password)
+    
+    query = """
+        CREATE ROLE cs_instructor LOGIN PASSWORD 'instructor123';
+        CREATE VIEW cs_students AS SELECT * FROM student WHERE dept_name = 'Comp. Sci.';
+        GRANT SELECT ON cs_students TO cs_instructor;
+        GRANT SELECT ON student TO cs_instructor;
+    """
         
     execute_query(db, query)
     db.close()
@@ -51,7 +71,7 @@ if __name__ == "__main__":
 
         db.close()
         
-    db = connect_to_db()
+    db = connect_as_user(username, password)
     query = """
         DROP VIEW IF EXISTS cs_students;
         REVOKE SELECT ON student FROM cs_instructor;
