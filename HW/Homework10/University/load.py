@@ -65,7 +65,32 @@ def get_relation_names(connection, ddl_file="ddl.sql"):
                     relations.append(relation_name)
     return [rel for rel in relations if rel in table_names]
     
-        
+def show_schema(connection) -> None:
+    if not connection:
+        print("No database connection")
+        return
+
+    try:
+        with connection.cursor() as cur:
+            for table in get_relation_names(connection):
+                cur.execute("""
+                    SELECT column_name, data_type, is_nullable
+                    FROM information_schema.columns
+                    WHERE table_name = %s
+                    ORDER BY ordinal_position;
+                """, (table,))
+
+                columns = cur.fetchall()
+
+                print(f"\nTable: {table}")
+                print(tabulate(columns, headers=[
+                    "Column", "Type", "Nullable"
+                ], tablefmt="psql"))
+
+    except Exception as e:
+        print(f"Error showing schema: {e}")
+
+
 if __name__ == "__main__":
     db_connection = connect_to_db()
     if db_connection:
