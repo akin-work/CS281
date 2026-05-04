@@ -24,11 +24,24 @@ def connect_to_db():
         print(f"An error occurred while connecting to the database: {e}")
         return None 
     
-def create_database(connection, db_name="university"):
+def create_database(db_name):
+    load_dotenv()
+    admin_db = os.getenv("ADMIN_DB", "postgres")
+    
+    conn = None
+    
     try:
-        connection.autocommit = True
-
-        with connection.cursor() as cur:
+        conn = psycopg2.connect(
+            host=os.getenv("DB_HOST"),
+            database=admin_db,
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            sslmode=os.getenv("DB_SSLMODE"),
+            channel_binding=os.getenv("DB_CHANNEL_BINDING")
+        )
+        conn.autocommit = True
+        
+        with conn.cursor() as cur:
             cur.execute(f"SELECT 1 FROM pg_database WHERE datname='{db_name}';") 
             if not cur.fetchone():
                 cur.execute(f"CREATE DATABASE {db_name};") 
@@ -37,6 +50,9 @@ def create_database(connection, db_name="university"):
                 print(f"Database '{db_name}' already exists")
     except Exception as e:
         print(f"An error occurred while creating the database: {e}")
+    finally:
+        if conn:
+            conn.close()
         
 def create_tables(connection):
     try:        

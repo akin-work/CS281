@@ -53,6 +53,7 @@ def factory_reset() -> None:
             )
 
         print(f"Database '{target_db}' recreated successfully")
+        
 
     except Exception as e:
         print("Factory reset failed:", e)
