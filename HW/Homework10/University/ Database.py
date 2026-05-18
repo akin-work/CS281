@@ -181,3 +181,18 @@ def drop_database(db_name: str) -> None:
         
     
 
+''' JS
+2.2: incomplete - 0.5
+2.6: incorrect - 0.5
+2.7: incorrect - 0.5
+2.8: incorrect - 0.5
+2.10: incorrect - 0.5
+2.12: incorrect - 0.5
+2.13: incorrect - 0.5
+2.15: incorrect - 0.5
+2.16: incorrect - 0.5
+
+Libraries not imported properly.
+Multiple allignment issues.
+-0.5
+'''
