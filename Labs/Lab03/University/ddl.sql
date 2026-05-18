@@ -103,3 +103,4 @@ CREATE TABLE IF NOT EXISTS takes
 		on delete cascade,
 	 foreign key (prereq_id) references course
 	);
+	

@@ -1,0 +1,7 @@
+DB_CONNECTION_STRING=postgresql://neondb_owner:npg_Lph1v0nIVefJ@ep-muddy-scene-anbjn64m-pooler.c-6.us-east-1.aws.neon.tech/university?sslmode=require&channel_binding=require
+DB_HOST=ep-muddy-scene-anbjn64m-pooler.c-6.us-east-1.aws.neon.tech
+DB_NAME=university
+DB_USER=neondb_owner
+DB_PASSWORD=npg_Lph1v0nIVefJ
+DB_SSLMODE=require
+DB_CHANNEL_BINDING=require
