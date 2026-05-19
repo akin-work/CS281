@@ -9,5 +9,9 @@ if __name__ == "__main__":
         db.factory_reset()
         db.show_schema()
         
-        
+    # OR 
+    db = DB()
+    db.factory_reset()
+    db.show_schema()
+    db.close()
         
